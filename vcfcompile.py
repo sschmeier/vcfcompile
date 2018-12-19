@@ -6,7 +6,7 @@ NAME: vcfcompile.py
 DESCRIPTION
 ===========
 
-Read vcf-files and compile a list of unique variants and extract for each file the QD value of the SNP. Prints to standard out. Some stats go to standard error.
+Read vcf-files and compile a table of unique variants and extract for each file the QD value of the SNPs. Prints to standard out. Some stats go to standard error.
 
 INSTALLATION
 ============
@@ -106,7 +106,7 @@ def info(text, log=sys.stderr, repeat=False):
 def parse_cmdline():
     """ Parse command-line args. """
     # parse cmd-line ----------------------------------------------------------
-    description = 'Read vcf-files and compile a list of unique variants and extract for each file the QD value of the SNP. Prints to standard out. Some stats go to standard error.'
+    description = 'Read vcf-files and compile a table of unique variants and extract for each file the QD value of the SNPs. Prints to standard out. Some stats go to standard error.'
     version = 'version {}, date {}'.format(__version__, __date__)
     epilog = 'Copyright {} ({})'.format(__author__, __email__)
 
