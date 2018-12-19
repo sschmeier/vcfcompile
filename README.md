@@ -26,13 +26,16 @@ git clone git@github.com:sschmeier/vcfcompile.git
  - Otherwise nothing special. Uses only standard libs for now.
 
 
-## USAGE
+## EXAMPLE
+
+
+### Run
 
 ```bash
-python vcfcompile.py data/*.vcf(.gz) > table.txt
+python vcfcompile.py --snpeff data/*.vcf(.gz) > table.txt
 ```
 
-## OUTPUT
+### Output
 
 | CHROM | POS      | ID        | REF | ALT | GENES            | FILE1.vcf.gz | FILE2.vcf.gz | ... |
 |-------|----------|-----------|-----|-----|------------------|--------------|--------------|-----|
