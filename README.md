@@ -32,6 +32,14 @@ git clone git@github.com:sschmeier/vcfcompile.git
 python vcfcompile.py data/*.vcf(.gz) > table.txt
 ```
 
+## OUTPUT
+
+| CHROM | POS      | ID        | REF | ALT | GENES            | FILE1.vcf.gz | FILE2.vcf.gz | ... |
+|-------|----------|-----------|-----|-----|------------------|--------------|--------------|-----|
+| chr17 | 16382069 | rs1060079 | T   | C   | UBB:HIGH;UBB:LOW | 2.99         | 3.64         | ... |
+| ...   |          |           |     |     |                  |              |              |     |
+
+
 
 ## TODO
 
