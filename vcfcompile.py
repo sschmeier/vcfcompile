@@ -203,7 +203,7 @@ def main():
                 res_genes.sort()
                 res_genes = ';'.join(res_genes)
             else:
-                res_genes = ""
+                res_genes = "-"
 
             if args.qual:
                 qd = a[5]
@@ -239,7 +239,7 @@ def main():
                     qd, gene = variants[f][var]
                     genes.append(gene)
                 except KeyError:
-                    qd = ""
+                    qd = "-"
                     
                 fqds.append(qd)
             fqds = '\t'.join(fqds)
