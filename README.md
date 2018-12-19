@@ -2,26 +2,33 @@
 
 ## DESCRIPTION
 
-Simple script to read a bunch of vcf-files and compile a table of all variants and extract for each file the QD value of the SNPs and list them for each file. Prints to standard out. Some stats go to standard error.
+Simple script to read a bunch of vcf-files with SNPs and find the list of unique SNPs.
+For each variant, extract for each file the variant's QD or QUAL value and put in table form.
+Gives an overview of overlapping variants and quality values in different samples.
 
-Untested for very large vcf-files. IN the future need to implement cyvcf for speed.
+Prints to standard out. Some stats go to standard error.
+
+Untested on very large vcf-files. In the future need to implement cyvcf for speed. Right now its used for filtered SNPs.
 
 
 ## INSTALLATION
 
-Nothing special. Uses only standard libs.
+### Requirements
+
+ - Python 3
+ - Otherwise nothing special. Uses only standard libs for now.
 
 
 ## USAGE
 
 ```bash
-python vcfcompile.py *.vcf(.gz) > table.txt
+python vcfcompile.py data/*.vcf(.gz) > table.txt
 ```
 
 
 ## TODO
 
- - Make use of cyvcf for speed.
+ - Make use of cyvcf (https://github.com/arq5x/cyvcf) for speed.
 
 
 ## VERSION HISTORY
