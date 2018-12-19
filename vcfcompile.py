@@ -6,7 +6,9 @@ NAME: vcfcompile.py
 DESCRIPTION
 ===========
 
-Read vcf-files and compile a table of unique variants and extract for each file the QD value of the SNPs. Prints to standard out. Some stats go to standard error.
+Read vcf-files and compile a table of unique variants
+and extract for each file the QD value of the SNPs.
+Prints to standard out. Some stats go to standard error.
 
 INSTALLATION
 ============
@@ -106,7 +108,11 @@ def info(text, log=sys.stderr, repeat=False):
 def parse_cmdline():
     """ Parse command-line args. """
     # parse cmd-line ----------------------------------------------------------
-    description = 'Read vcf-files and compile a table of unique variants and extract for each file the QD value of the SNPs. Prints to standard out. Some stats go to standard error.'
+    description = 'Read vcf-files and compile a table of unique' + \
+                  ' variants and extract for each file the QD value' + \
+                  ' of the SNPs. Prints to standard out. Some stats' + \
+                  ' go to standard error.'
+                  
     version = 'version {}, date {}'.format(__version__, __date__)
     epilog = 'Copyright {} ({})'.format(__author__, __email__)
 
@@ -121,13 +127,14 @@ def parse_cmdline():
         nargs='+',
         help='vcf-file.')
     parser.add_argument('--snpeff',
-                        action="store_true",
-                        default=False,
-                        help='Extract SnpEff effects on genes. Requires that vcf is a result of a SnpEff run.')
+        action="store_true",
+        default=False,
+        help='Extract SnpEff effects on genes.' + \
+             'Requires that vcf is a result of a SnpEff run.')
     parser.add_argument('--qual',
-                        action="store_true",
-                        default=False,
-                        help='Extract QUAL instead of QD values.')
+        action="store_true",
+        default=False,
+        help='Extract QUAL instead of QD values.')
     
     # if no arguments supplied print help
     if len(sys.argv) == 1:
@@ -189,7 +196,9 @@ def main():
                 # run through SNPeff?
                 if not res_genes:
                     sys.stderr.write("{}\n".format('\t'.join(a)))
-                    error("Could not extract genes. Was your vcf-file {} annotated with SnpEff? EXIT.".format(f))
+                    error("Could not extract genes. " + \
+                          "Was your vcf-file {} annotated " + \
+                          "with SnpEff? EXIT.".format(f))
                 res_genes = ['{}:{}'.format(t[1], t[0]) for t in list(set(res_genes))]
                 res_genes.sort()
                 res_genes = ';'.join(res_genes)
@@ -221,7 +230,6 @@ def main():
     # use a try - except clause to handle
     try:
         outfileobj.write("{}\n".format(header))
-
         for vartuple in allvars_sorted:
             var = vartuple[0]
             fqds = []
@@ -242,9 +250,6 @@ def main():
                                                                    var[4],
                                                                    gene,
                                                                    fqds))
-
-            
-            
         # flush output here to force SIGPIPE to be triggered
         # while inside this try block.
         sys.stdout.flush()
