@@ -13,6 +13,13 @@ Untested on very large vcf-files. In the future need to implement cyvcf for spee
 
 ## INSTALLATION
 
+### Clone
+
+```bash
+git clone git@github.com:sschmeier/vcfcompile.git
+```
+
+
 ### Requirements
 
  - Python 3
