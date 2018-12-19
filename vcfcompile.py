@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 NAME: vcfcompile.py
-=========
+===================
 
 DESCRIPTION
 ===========
