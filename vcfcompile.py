@@ -144,13 +144,13 @@ def parse_cmdline():
         metavar='TYPE',
         default="QD",
         help='Extract this value from the annotation line [default="QD"]. ' + \
-        'Adds a "-", if the value is not found. Use --stop overwrite ' + \
-        'this behaviour and through an error.')
-    parser.add_argument('--stop',
+        'Adds a "-", if the value is not found and --warn is specified. ' + \
+        'Throws an error otherwise.')
+    parser.add_argument('--warn',
         action="store_true",
         default=False,
-        help='Throw an exception if the value could not be extracted '+ \
-        ' from a vcf line.')
+        help='Do not throw an exception if the value could not be extracted '+ \
+        ' from a vcf line. Instead only print warning to stderr.')
     
     # if no arguments supplied print help
     if len(sys.argv) == 1:
@@ -231,11 +231,12 @@ def main():
                 if not ann:
                     outstr = 'Could not find "{}" value:\nFile: '.format(args.ann) + \
                              '"{}"\nLine ({}): {}'.format(f,i,'\t'.join(a))
-                    if args.stop:
-                        error(outstr)
-                    else:
+                    if args.warn:
                         warning(outstr)
+                        warning('Set value to for variant in file {} to "-".'.format(f))
                         ann = "-"
+                    else:
+                        error(outstr)                       
                 else:
                     ann = ann.group(1)
 
