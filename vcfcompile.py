@@ -30,11 +30,12 @@ TODO
 VERSION HISTORY
 ===============
 
-0.0.1    2018    Initial version.
+0.0.2    2019/01/10    Fixed error: _csv.Error: field larger than field limit (131072)
+0.0.1    2018          Initial version.
 
 LICENCE
 =======
-2018, copyright Sebastian Schmeier
+2018-2019, copyright Sebastian Schmeier
 s.schmeier@gmail.com // https://www.sschmeier.com
 
 template version: 2.0 (2018/12/19)
@@ -51,8 +52,12 @@ import time
 import re
 import operator
 
-__version__ = '0.0.1'
-__date__ = '2018'
+# from https://stackoverflow.com/questions/15063936/csv-error-field-larger-than-field-limit-131072
+maxInt = sys.maxsize
+decrement = True
+
+__version__ = '0.0.2'
+__date__ = '2019/01/10'
 __email__ = 's.schmeier@gmail.com'
 __author__ = 'Sebastian Schmeier'
 
@@ -184,7 +189,7 @@ def main():
             variants[basename] = {}
             basenames.append(basename)
         # delimited file handler
-        csv_reader_obj = csv.reader(fileobj, delimiter="\t")
+        csv_reader_obj = csv.reader(fileobj, delimiter="\t", quoting=csv.QUOTE_NONE)
         for a in csv_reader_obj:
             if a[0][0] == "#":  # comment
                 continue
