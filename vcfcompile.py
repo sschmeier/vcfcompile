@@ -52,9 +52,7 @@ import time
 import re
 import operator
 
-# from https://stackoverflow.com/questions/15063936/csv-error-field-larger-than-field-limit-131072
-maxInt = sys.maxsize
-decrement = True
+csv.field_size_limit(sys.maxsize)
 
 __version__ = '0.0.2'
 __date__ = '2019/01/10'
@@ -189,7 +187,6 @@ def main():
             variants[basename] = {}
             basenames.append(basename)
         # delimited file handler
-        print(f)
         csv_reader_obj = csv.reader(fileobj, delimiter="\t", quoting=csv.QUOTE_NONE)
         for a in csv_reader_obj:
             if a[0][0] == "#":  # comment
