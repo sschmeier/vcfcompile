@@ -51,6 +51,8 @@ import zipfile
 import time
 import re
 import operator
+import logging
+
 
 csv.field_size_limit(sys.maxsize)
 
@@ -89,7 +91,7 @@ def alert(atype, text, log, repeat=False):
 
     log.write('{}{}{}'.format(colors[atype], textout, reset))
     if atype == 'error':
-        sys.exit()
+        sys.exit(1)
 
 
 def success(text, log=sys.stderr):
@@ -132,12 +134,23 @@ def parse_cmdline():
     parser.add_argument('--snpeff',
         action="store_true",
         default=False,
-        help='Extract SnpEff effects on genes.' + \
+        help='Extract SnpEff effects on genes. ' + \
              'Requires that vcf is a result of a SnpEff run.')
     parser.add_argument('--qual',
         action="store_true",
         default=False,
-        help='Extract QUAL instead of QD values.')
+        help='Extract QUAL instead of annotation values.')
+    parser.add_argument('--ann',
+        metavar='TYPE',
+        default="QD",
+        help='Extract this value from the annotation line [default="QD"]. ' + \
+        'Adds a "-", if the value is not found. Use --stop overwrite ' + \
+        'this behaviour and through an error.')
+    parser.add_argument('--stop',
+        action="store_true",
+        default=False,
+        help='Throw an exception if the value could not be extracted '+ \
+        ' from a vcf line.')
     
     # if no arguments supplied print help
     if len(sys.argv) == 1:
@@ -165,13 +178,14 @@ def load_file(filename):
 
 def main():
     """ The main funtion. """
+    #logger = logging.getLogger(__name__)
     args, parser = parse_cmdline()
 
     if len(args.files) == 1:
         error("Script expects at least two files. EXIT.")
 
     reg_genes = re.compile("\|(HIGH|MODERATE|LOW|MODIFIER)\|(.+?)\|")
-    reg_qd = re.compile(";QD=(.+?);")
+    reg_ann = re.compile(";{}=(.+?);".format(args.ann))
         
     variants = {}
     allvars = {}
@@ -188,7 +202,9 @@ def main():
             basenames.append(basename)
         # delimited file handler
         csv_reader_obj = csv.reader(fileobj, delimiter="\t", quoting=csv.QUOTE_NONE)
+        i = 0
         for a in csv_reader_obj:
+            i += 1
             if a[0][0] == "#":  # comment
                 continue
             tVariant = tuple(a[0:5])
@@ -209,13 +225,21 @@ def main():
                 res_genes = "-"
 
             if args.qual:
-                qd = a[5]
+                ann = a[5]
             else:
-                qd = reg_qd.search(a[7])
-                assert qd
-                qd = qd.group(1)
+                ann = reg_ann.search(a[7])
+                if not ann:
+                    outstr = 'Could not find "{}" value:\nFile: '.format(args.ann) + \
+                             '"{}"\nLine ({}): {}'.format(f,i,'\t'.join(a))
+                    if args.stop:
+                        error(outstr)
+                    else:
+                        warning(outstr)
+                        ann = "-"
+                else:
+                    ann = ann.group(1)
 
-            variants[basename][tVariant] = (qd, res_genes) 
+            variants[basename][tVariant] = (ann, res_genes) 
 
         success("{}: {} variants found".format(basename, len(variants[basename])))
     success("Number of unique variants: {}".format(len(allvars)))
