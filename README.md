@@ -51,10 +51,11 @@ python vcfcompile.py --snpeff data/*.vcf(.gz) > table.txt
 
 ## VERSION HISTORY
 
-- 0.0.1    2018    Initial version.
+- 0.0.2    2019/01/10    Fixed error: _csv.Error: field larger than field limit (131072)
+- 0.0.1    2018               Initial version.
 
 
 ## LICENCE
 
-MIT, 2018, copyright Sebastian Schmeier
+MIT, 2018-2019, copyright Sebastian Schmeier
 s.schmeier@gmail.com // https://www.sschmeier.com
