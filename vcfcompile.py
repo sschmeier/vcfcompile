@@ -189,6 +189,7 @@ def main():
             variants[basename] = {}
             basenames.append(basename)
         # delimited file handler
+        print(f)
         csv_reader_obj = csv.reader(fileobj, delimiter="\t", quoting=csv.QUOTE_NONE)
         for a in csv_reader_obj:
             if a[0][0] == "#":  # comment
