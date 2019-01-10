@@ -125,10 +125,6 @@ def parse_cmdline():
         'file',
         metavar='FILE',
         help='vcf-file.')
-    parser.add_argument('--qual',
-                        metavar='QUAL',
-                        default=None,
-                        help='Filter on QUAL >= x. [default="None"].')
     parser.add_argument('--QD',
                         metavar='QD',
                         type=float,
