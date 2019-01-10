@@ -126,35 +126,35 @@ def parse_cmdline():
         metavar='FILE',
         help='vcf-file.')
     parser.add_argument('--QD',
-                        metavar='QD',
+                        metavar='FLOAT',
                         type=float,
                         default=2.0,
-                        help='Filter on QD > x. [default=2.].')
+                        help='Filter on QD > FLOAT. [default=2.].')
     parser.add_argument('--FS',
-                        metavar='FS',
+                        metavar='FLOAT',
                         type=float,
                         default=30.,
-                        help='Filter on FS < x. [default=30.].')
+                        help='Filter on FS < FLOAT. [default=30.].')
     parser.add_argument('--DP',
-                        metavar='DP',
+                        metavar='FLOAT',
                         type=float,
                         default=10.,
-                        help='Filter on DP > x. [default=10.].')
+                        help='Filter on DP > FLOAT. [default=10.].')
     parser.add_argument('--MQ',
-                        metavar='MQ',
+                        metavar='FLOAT',
                         type=float,
                         default=40.,
-                        help='Filter on MQ > x. [default=40.].')
+                        help='Filter on MQ > FLOAT. [default=40.].')
     parser.add_argument('--MQRankSum',
-                        metavar='MQRankSum',
+                        metavar='FLOAT',
                         type=float,
                         default=-12.5,
-                        help='Filter on MQRankSum > x. [default=-12.5].')
+                        help='Filter on MQRankSum > FLOAT. [default=-12.5].')
     parser.add_argument('--ReadPosRankSum',
-                        metavar='ReadPosRankSum',
+                        metavar='FLOAT',
                         type=float,
                         default=-8.0,
-                        help='Filter on ReadPosRankSum > x. [default=-8.0].')
+                        help='Filter on ReadPosRankSum > FLOAT. [default=-8.0].')
     
     parser.add_argument('--warn',
         action="store_true",
