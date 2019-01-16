@@ -136,6 +136,11 @@ def parse_cmdline():
         default=False,
         help='Extract SnpEff effects on genes. ' + \
              'Requires that vcf is a result of a SnpEff run.')
+    parser.add_argument('--snpeffType',
+                        metavar='TYPE',
+        default=None,
+        help='Extract genes with this SnpEff effect (HIGH, MODERATE, LOW, MODIFIER). ' + \
+        'Ignore other genes. [default: all"]')
     parser.add_argument('--qual',
         action="store_true",
         default=False,
@@ -184,7 +189,11 @@ def main():
     if len(args.files) == 1:
         error("Script expects at least two files. EXIT.")
 
-    reg_genes = re.compile("\|(HIGH|MODERATE|LOW|MODIFIER)\|(.+?)\|")
+    if not args.snpeffType:
+        reg_genes = re.compile("\|(HIGH|MODERATE|LOW|MODIFIER)\|(.+?)\|")
+    else:
+        reg_genes = re.compile("\|({})\|(.+?)\|".format(args.snpeffType))
+    
     reg_ann = re.compile(";{}=(.+?);".format(args.ann))
         
     variants = {}
@@ -218,7 +227,11 @@ def main():
                     error("Could not extract genes. " + \
                           "Was your vcf-file {} annotated " + \
                           "with SnpEff? EXIT.".format(f))
-                res_genes = ['{}:{}'.format(t[1], t[0]) for t in list(set(res_genes))]
+                if args.snpeffType:
+                    res_genes = ['{}'.format(t[1]) for t in list(set(res_genes))]
+                else:
+                    res_genes = ['{}:{}'.format(t[1], t[0]) for t in list(set(res_genes))]
+                res_genes = list(set(res_genes))
                 res_genes.sort()
                 res_genes = ';'.join(res_genes)
             else:
