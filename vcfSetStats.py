@@ -49,8 +49,6 @@ import zipfile
 import time
 import re
 import operator
-import logging
-
 
 csv.field_size_limit(sys.maxsize)
 
@@ -115,12 +113,7 @@ def info(text, log=sys.stderr, repeat=False):
 def parse_cmdline():
     """ Parse command-line args. """
     # parse cmd-line ----------------------------------------------------------
-    description = (
-        "Read vcf-files and compile a table of unique"
-        + " variants and extract for each file the QD value"
-        + " of the SNPs. Prints to standard out. Some stats"
-        + " go to standard error."
-    )
+    description = 'Read a vcf-file that is a result of "gatk3 CombineVariants" and compile statistics of the caller intersections. Prints to standard out. Some stats go to standard error.'
 
     version = "version {}, date {}".format(__version__, __date__)
     epilog = "Copyright {} ({})".format(__author__, __email__)
@@ -131,7 +124,9 @@ def parse_cmdline():
     parser.add_argument("file", metavar="FILE", help="vcf-file.")
     parser.add_argument(
         "--qual",
+        dest = "qual",
         metavar="NUMBER",
+        type = float,
         default=0.0,
         help="Only consider variants with a QUAL value equal or greater than this value. [default = 0]",
     )
@@ -168,11 +163,7 @@ def load_file(filename):
 
 def main():
     """ The main funtion. """
-    # logger = logging.getLogger(__name__)
     args, parser = parse_cmdline()
-
-    if len(args.files) == 1:
-        error("Script expects at least two files. EXIT.")
 
     if args.snpeffType:
         reg_genes = re.compile("\|(HIGH|MODERATE|LOW|MODIFIER)\|(.+?)\|")
@@ -182,22 +173,29 @@ def main():
     except IOError:
         error('Could not load file "{}". EXIT.'.format(f))
 
-    reg_set = re.compile("set=(.+?)[;|\s]")
+    reg_set = re.compile("set=(.+?)(?:;|$)")
 
     csv_reader_obj = csv.reader(fileobj, delimiter="\t", quoting=csv.QUOTE_NONE)
     i = 0  # number of variants in file
     iDroppedQual = 0
     iDroppedEff = 0
+    iConsidered = 0
     callerSets = {}
     for a in csv_reader_obj:
         if a[0][0] == "#":  # comment
             continue
 
         i += 1
-        qual = float(a[5])  # quality value
-        if qual < parser.qual:
-            iDroppedQual += 1
-            continue
+        
+        if a[5] == ".":
+            if args.qual > 0:
+                iDroppedQual += 1
+                continue
+        else:
+            qual = float(a[5])  # quality value
+            if qual < args.qual:
+                iDroppedQual += 1
+                continue
 
         if args.snpeffType:
             res_genes = reg_genes.findall(a[7])
@@ -205,17 +203,21 @@ def main():
                 iDroppedEff += 1
                 continue
 
+        iConsidered += 1
         res_set = reg_set.search(a[7])
-        assert res_set
-
-        callers = res_set.split("-")
+        if not res_set:
+            error("Could not extract set from line:\n{}\n".format("\t".join(a)))
+        callers = res_set.groups()[0].split("-")
         callers.sort()
+        callSet = "|".join(callers)
+        callerSets[callSet] = callerSets.get(callSet, 0) + 1
 
-        success("{}: {} variants found".format(basename, len(variants[basename])))
-    success("Number of unique variants: {}".format(len(allvars)))
+    success("Variants in file: {}".format(i))
+    success("Number of variants dropped due to QUAL: {}".format(iDroppedQual))
+    success("Number of variants dropped due to EFF: {}".format(iDroppedEff))
 
-    allvars_sorted = sorted(allvars.items(), key=operator.itemgetter(1))
-    allvars_sorted.reverse()
+    callerSets_sorted = sorted(callerSets.items(), key=operator.itemgetter(1))
+    callerSets_sorted.reverse()
 
     outfileobj = sys.stdout
     # For printing to stdout
@@ -223,25 +225,13 @@ def main():
     # like head. => http://docs.python.org/library/signal.html
     # use a try - except clause to handle
     try:
-        outfileobj.write("{}\n".format(header))
-        for vartuple in allvars_sorted:
-            var = vartuple[0]
-            fqds = []
-            genes = []
-            for f in basenames:
-                try:
-                    qd, gene = variants[f][var]
-                    genes.append(gene)
-                except KeyError:
-                    qd = "-"
-
-                fqds.append(qd)
-            fqds = "\t".join(fqds)
-            outfileobj.write(
-                "{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(
-                    var[0], var[1], var[2], var[3], var[4], gene, fqds
-                )
-            )
+        outfileobj.write("Set\tNumCallers\tNumVars\tPctVars\n")
+        for t in callerSets_sorted:
+            cset = t[0]
+            numC = len(cset.split('|'))
+            num = t[1]
+            pct = num * 100.0 / iConsidered
+            outfileobj.write("{}\t{}\t{}\t{}\n".format(cset, numC, num, pct))
         # flush output here to force SIGPIPE to be triggered
         # while inside this try block.
         sys.stdout.flush()
