@@ -124,9 +124,9 @@ def parse_cmdline():
     parser.add_argument("file", metavar="FILE", help="vcf-file.")
     parser.add_argument(
         "--qual",
-        dest = "qual",
+        dest="qual",
         metavar="NUMBER",
-        type = float,
+        type=float,
         default=0.0,
         help="Only consider variants with a QUAL value equal or greater than this value. [default = 0]",
     )
@@ -186,7 +186,7 @@ def main():
             continue
 
         i += 1
-        
+
         if a[5] == ".":
             if args.qual > 0:
                 iDroppedQual += 1
@@ -228,7 +228,7 @@ def main():
         outfileobj.write("Set\tNumCallers\tNumVars\tPctVars\n")
         for t in callerSets_sorted:
             cset = t[0]
-            numC = len(cset.split('|'))
+            numC = len(cset.split("|"))
             num = t[1]
             pct = num * 100.0 / iConsidered
             outfileobj.write("{}\t{}\t{}\t{}\n".format(cset, numC, num, pct))
