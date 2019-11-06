@@ -228,7 +228,10 @@ def main():
         outfileobj.write("Set\tNumCallers\tNumVars\tPctVars\n")
         for t in callerSets_sorted:
             cset = t[0]
-            numC = len(cset.split("|"))
+            if cset == "Intersection":
+                numC = "-1"
+            else:
+                numC = len(cset.split("|"))
             num = t[1]
             pct = num * 100.0 / iConsidered
             outfileobj.write("{}\t{}\t{}\t{}\n".format(cset, numC, num, pct))
