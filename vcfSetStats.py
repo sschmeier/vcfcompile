@@ -49,6 +49,7 @@ import zipfile
 import time
 import re
 import operator
+import itertools
 
 csv.field_size_limit(sys.maxsize)
 
@@ -136,6 +137,18 @@ def parse_cmdline():
         default=None,
         help='Only consider variants with this SnpEff effect annotation (HIGH, MODERATE, LOW, MODIFIER). [default: not considered"]',
     )
+    parser.add_argument(
+        "--infer",
+        action="store_true",
+        default=False,
+        help="Infer all combinations based on single callers (which are assumed to be likely). The total caller combinations are 2**n, with n number of single callers. Sets the ones not found to 0.",
+    )
+    parser.add_argument(
+        "--sort",
+        action="store_true",
+        default=False,
+        help="Sort by combination names. Can be used to get normalised output together with --infer. [default: sorted by number of variants]",
+    )
 
     # if no arguments supplied print help
     if len(sys.argv) == 1:
@@ -209,15 +222,57 @@ def main():
             error("Could not extract set from line:\n{}\n".format("\t".join(a)))
         callers = res_set.groups()[0].split("-")
         callers.sort()
-        callSet = "|".join(callers)
+        callSet = tuple(callers)
         callerSets[callSet] = callerSets.get(callSet, 0) + 1
 
     success("Variants in file: {}".format(i))
     success("Number of variants dropped due to QUAL: {}".format(iDroppedQual))
     success("Number of variants dropped due to EFF: {}".format(iDroppedEff))
 
-    callerSets_sorted = sorted(callerSets.items(), key=operator.itemgetter(1))
-    callerSets_sorted.reverse()
+    iNumSets = len(callerSets.keys())
+    success("Number of combination of callers found in file: {}".format(iNumSets))
+
+    # Infer missing combinations of callers
+    if args.infer:
+        singleCallers = []
+        # get the single callers
+        for t in callerSets:
+            if len(t) == 1 and t[0] != "Intersection":
+                singleCallers.append(t[0])
+        singleCallers.sort()  # ensures lexcographical sort in subsets
+        numCallers = len(singleCallers)
+
+        # if we likely miss some combinations, add them with zero
+        if iNumSets < (2 ** numCallers) - 1:  # do not count empty set
+            warning(
+                "Inferred a total of {} caller combinations.".format(
+                    (2 ** numCallers) - 1
+                )
+            )
+            warning(
+                "Try to find the missing {} combinations.".format(
+                    (2 ** numCallers) - 1 - iNumSets
+                )
+            )
+            for i in range(1, numCallers + 1):
+                for comb in itertools.combinations(singleCallers, i):
+                    # Intersection present? Its the combination of all callers
+                    if len(comb) == numCallers and ("Intersection",) not in callerSets:
+                        warning("Combination added: {} as 'Intersection'".format(comb))
+                        callerSets[("Intersection",)] = 0
+                        continue
+                    elif len(comb) == numCallers and ("Intersection",) in callerSets:
+                        continue
+
+                    if comb not in callerSets:
+                        warning("Combination added: {}".format(comb))
+                        callerSets[tuple(comb)] = 0
+
+    if args.sort:
+        callerSets_sorted = sorted(callerSets.items(), key=operator.itemgetter(0))
+    else:  # sort according to number of variants
+        callerSets_sorted = sorted(callerSets.items(), key=operator.itemgetter(1))
+        callerSets_sorted.reverse()
 
     outfileobj = sys.stdout
     # For printing to stdout
@@ -227,7 +282,7 @@ def main():
     try:
         outfileobj.write("Set\tNumCallers\tNumVars\tPctVars\n")
         for t in callerSets_sorted:
-            cset = t[0]
+            cset = "|".join(list(t[0]))
             if cset == "Intersection":
                 numC = "-1"
             else:
