@@ -29,7 +29,8 @@ TODO
 VERSION HISTORY
 ===============
 
-0.0.1    2018911/06    Initial version.
+0.0.2    20191107    Sort and infer added
+0.0.1    20191106    Initial version.
 
 LICENCE
 =======
@@ -53,8 +54,8 @@ import itertools
 
 csv.field_size_limit(sys.maxsize)
 
-__version__ = "0.0.1"
-__date__ = "2019/11/06"
+__version__ = "0.0.2"
+__date__ = "2019/11/07"
 __email__ = "s.schmeier@protonmail.com"
 __author__ = "Sebastian Schmeier"
 
