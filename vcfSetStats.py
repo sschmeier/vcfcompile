@@ -29,6 +29,7 @@ TODO
 VERSION HISTORY
 ===============
 
+0.1.1    20200429    Pct with ID
 0.0.2    20191107    Sort and infer added
 0.0.1    20191106    Initial version.
 
@@ -194,7 +195,9 @@ def main():
     iDroppedQual = 0
     iDroppedEff = 0
     iConsidered = 0
+    iAnnotated = 0
     callerSets = {}
+    callerSetsAnno = {}
     for a in csv_reader_obj:
         if a[0][0] == "#":  # comment
             continue
@@ -218,6 +221,8 @@ def main():
                 continue
 
         iConsidered += 1
+
+
         res_set = reg_set.search(a[7])
         if not res_set:
             error("Could not extract set from line:\n{}\n".format("\t".join(a)))
@@ -225,6 +230,15 @@ def main():
         callers.sort()
         callSet = tuple(callers)
         callerSets[callSet] = callerSets.get(callSet, 0) + 1
+        
+        if callSet not in callerSetsAnno:
+            callerSetsAnno[callSet] = 0
+        # annotation with snp id?
+        if a[2] != ".":
+            callerSetsAnno[callSet] += 1
+            iAnnotated += 1
+
+
 
     success("Variants in file: {}".format(i))
     success("Number of variants dropped due to QUAL: {}".format(iDroppedQual))
@@ -281,8 +295,12 @@ def main():
     # like head. => http://docs.python.org/library/signal.html
     # use a try - except clause to handle
     try:
-        outfileobj.write("Set\tNumCallers\tNumVars\tPctVars\n")
+        outfileobj.write("Set\tNumCallers\tNumVars\tPctVars\tNumAnno\tPctAnnotated\n")
         for t in callerSets_sorted:
+            anno = 0
+            if t[0] in callerSetsAnno:
+                anno = callerSetsAnno[t[0]]
+
             cset = "|".join(list(t[0]))
             if cset == "Intersection":
                 numC = "-1"
@@ -290,7 +308,11 @@ def main():
                 numC = len(cset.split("|"))
             num = t[1]
             pct = num * 100.0 / iConsidered
-            outfileobj.write("{}\t{}\t{}\t{}\n".format(cset, numC, num, pct))
+            pctanno = 0.0
+            if num > 0:
+                pctanno = anno * 100.0 / num  # pct of number SNPs called with particular of caller
+
+            outfileobj.write("{}\t{}\t{}\t{}\t{}\t{}\n".format(cset, numC, num, pct, anno, pctanno))
         # flush output here to force SIGPIPE to be triggered
         # while inside this try block.
         sys.stdout.flush()
